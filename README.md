@@ -29,9 +29,9 @@ The dashboard implements **Multiple Coordinated Views (MCV)** using declarative 
    - **Encodings**: X-axis = `Mean Recovery (%)`, Y-axis = `Transit_Mode` (sorted descending), Color = `Transit_Mode`.
    - **Features**: Dynamically linked to View 1; updates in real time to display the mean recovery rate of each transit mode during the selected timeframe.
 
-3. **VIEW 3: Day-of-Week Recovery Matrix (Heatmap)**
-   - **Encodings**: X-axis = `Day of Week` (ordered Mon–Sun), Y-axis = `Transit_Mode`, Color/Luminance = `Viridis` scale representing average recovery rate.
-   - **Features**: Reveals hybrid-work commuting patterns such as **TWaT** (Tuesday, Wednesday, Thursday peak recovery) versus weekends. Also cross-filtered by the selection in View 1.
+3. **VIEW 3: Day-of-Week Recovery Matrix (Heatmap & Value Matrix)**
+   - **Encodings**: X-axis = `Day of Week` (ordered Mon–Sun), Y-axis = `Transit_Mode`, Color = Diverging `redyellowgreen` scale centered at 100% baseline (`domainMid=100`), Text = Aggregated mean recovery percentage (`.1f`).
+   - **Features**: Reveals hybrid-work commuting patterns such as **TWaT** (Tuesday, Wednesday, Thursday peak recovery) versus weekends. Below-baseline values (<100%) render in red/orange tones, while exceeded values (>100%) render in green tones with clear text readouts. Also cross-filtered dynamically by View 1.
 
 ---
 
