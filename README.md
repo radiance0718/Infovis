@@ -130,4 +130,4 @@ The project relies on the following key dependencies:
 
 ## Dashboard
 
-![Dashboard](.\assets\Dashboard.png)
+![image-20261112182823037](.\assets\image-20261112182823037.png)
