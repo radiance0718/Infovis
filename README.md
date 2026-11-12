@@ -3,12 +3,17 @@
 ---
 
 ## Table of Contents
-- [Overview & Visual Design](#overview--visual-design)
-- [Requirements](#requirements)
-- [How to Run](#how-to-run)
-- [Project Structure](#project-structure)
-- [Interaction Guide](#interaction-guide)
-- [Dataset Information](#dataset-information)
+- [NYC Multimodal Transit Recovery Dashboard (2020 - 2025)](#nyc-multimodal-transit-recovery-dashboard-2020---2025)
+  - [Table of Contents](#table-of-contents)
+  - [Overview \& Visual Design](#overview--visual-design)
+  - [Requirements](#requirements)
+    - [Prerequisites](#prerequisites)
+    - [Python Packages](#python-packages)
+  - [How to Run](#how-to-run)
+    - [Option 1: Using pip (Standard)](#option-1-using-pip-standard)
+    - [Option 2: Using Conda](#option-2-using-conda)
+  - [Interaction Guide](#interaction-guide)
+  - [Dashboard](#dashboard)
 
 ---
 
@@ -86,6 +91,7 @@ The project relies on the following key dependencies:
 
 6. **View in browser**:
    Once started, Streamlit will open your default browser automatically. If not, visit:
+   
    ```
    http://localhost:8501
    ```
@@ -120,3 +126,8 @@ The project relies on the following key dependencies:
 - **Reset Selection**: Click once anywhere on the background of View 1 outside the active brush box to clear the selection and restore full-range data across all views.
 - **Tooltips**: Hover over data marks (lines, bars, or heatmap cells) across all views to inspect exact numeric values and metadata.
 
+---
+
+## Dashboard
+
+![Dashboard](.\assets\Dashboard.png)
