@@ -21,17 +21,17 @@
 
 The dashboard implements **Multiple Coordinated Views (MCV)** using declarative brushing and linking:
 
-1. **VIEW 1: Master Longitudinal Trajectory (Time-Series Line Chart)**
-   - **Encodings**: X-axis = `Date` (Temporal), Y-axis = `Recovery_Rate` (% of pre-pandemic baseline), Color = `Transit_Mode`.
-   - **Features**: Includes a red dashed reference line at 100% (pre-pandemic level) and an interactive 1D horizontal interval brush (`time_brush`).
+1. **VIEW 1: Master Longitudinal Trajectory (Weekly Avg Time-Series Line Chart)**
+   - **Encodings**: X-axis = `yearweek(Date)` (Temporal, weekly aggregated), Y-axis = `mean(Recovery_Rate)` (% weekly average of pre-pandemic baseline), Color = `Transit_Mode`.
+   - **Features**: Aggregates daily noise into smooth weekly averages, includes a red dashed reference line at 100% (pre-pandemic level), and an interactive 1D horizontal interval brush (`time_brush`).
 
 2. **VIEW 2: Avg Recovery in Selected Period (Ranked Horizontal Bar Chart)**
    - **Encodings**: X-axis = `Mean Recovery (%)`, Y-axis = `Transit_Mode` (sorted descending), Color = `Transit_Mode`.
    - **Features**: Dynamically linked to View 1; updates in real time to display the mean recovery rate of each transit mode during the selected timeframe.
 
 3. **VIEW 3: Day-of-Week Recovery Matrix (Heatmap & Value Matrix)**
-   - **Encodings**: X-axis = `Day of Week` (ordered Mon–Sun), Y-axis = `Transit_Mode`, Color = Diverging `redyellowgreen` scale centered at 100% baseline (`domainMid=100`), Text = Aggregated mean recovery percentage (`.1f`).
-   - **Features**: Reveals hybrid-work commuting patterns such as **TWaT** (Tuesday, Wednesday, Thursday peak recovery) versus weekends. Below-baseline values (<100%) render in red/orange tones, while exceeded values (>100%) render in green tones with clear text readouts. Also cross-filtered dynamically by View 1.
+   - **Encodings**: X-axis = `Day of Week` (ordered Mon–Sun), Y-axis = `Transit_Mode`, Color = Colorblind-safe diverging `redblue` scale (reversed) centered at 100% baseline (`domainMid=100`), Text = Aggregated mean recovery percentage (`.1f`).
+   - **Features**: Reveals hybrid-work commuting patterns such as **TWaT** (Tuesday, Wednesday, Thursday peak recovery) versus weekends. Below-baseline values (<100%) render in red tones, baseline (~100%) in neutral white, and exceeded values (>100%) in blue tones with clear text readouts. Also cross-filtered dynamically by View 1.
 
 ---
 
@@ -130,4 +130,4 @@ The project relies on the following key dependencies:
 
 ## Dashboard
 
-![image-20261112182823037](.\assets\image-20261112182823037.png)
+![image-20261118130527663](.\assets\Dashboard.png)
