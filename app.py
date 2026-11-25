@@ -106,7 +106,7 @@ heat_text = alt.Chart(df).mark_text(baseline='middle', fontSize=11, fontWeight='
 
 view3 = (heat_rect + heat_text).properties(
     width=1050, height=220,
-    title="VIEW 3: Day-of-Week Recovery Matrix (Blue: >100%, White: ~100%, Red: <100%)"
+    title="VIEW 3: Day-of-Week Recovery Matrix (Red: >100%, White: ~100%, Blue: <100%)"
 )
 
 dashboard = alt.vconcat(

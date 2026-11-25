@@ -31,7 +31,7 @@ The dashboard implements **Multiple Coordinated Views (MCV)** using declarative 
 
 3. **VIEW 3: Day-of-Week Recovery Matrix (Heatmap & Value Matrix)**
    - **Encodings**: X-axis = `Day of Week` (ordered Mon–Sun), Y-axis = `Transit_Mode`, Color = Colorblind-safe diverging `redblue` scale (reversed) centered at 100% baseline (`domainMid=100`), Text = Aggregated mean recovery percentage (`.1f`).
-   - **Features**: Reveals hybrid-work commuting patterns such as **TWaT** (Tuesday, Wednesday, Thursday peak recovery) versus weekends. Below-baseline values (<100%) render in red tones, baseline (~100%) in neutral white, and exceeded values (>100%) in blue tones with clear text readouts. Also cross-filtered dynamically by View 1.
+   - **Features**: Reveals hybrid-work commuting patterns such as **TWaT** (Tuesday, Wednesday, Thursday peak recovery) versus weekends. Below-baseline values (<100%) render in blue tones, baseline (~100%) in neutral white, and exceeded values (>100%) in red tones with clear text readouts. Also cross-filtered dynamically by View 1.
 
 ---
 
