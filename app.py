@@ -86,6 +86,7 @@ heat_rect = alt.Chart(df).mark_rect(stroke='white', strokeWidth=1).encode(
         scale=alt.Scale(scheme='redblue', domainMid=100, reverse=True), 
         title='Recovery (%)'
     ),
+    opacity=alt.condition(mode_select, alt.value(1.0), alt.value(0.18)),
     tooltip=['Transit_Mode:N', 'Day_of_Week:O', alt.Tooltip('mean(Recovery_Rate):Q', format='.1f')]
 ).transform_filter(
     time_brush
@@ -99,7 +100,8 @@ heat_text = alt.Chart(df).mark_text(baseline='middle', fontSize=11, fontWeight='
         'datum.mean_Recovery_Rate < 45 || datum.mean_Recovery_Rate > 125',
         alt.value('white'),
         alt.value('black')
-    )
+    ),
+    opacity=alt.condition(mode_select, alt.value(1.0), alt.value(0.2))
 ).transform_filter(
     time_brush
 )
