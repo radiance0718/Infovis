@@ -44,19 +44,20 @@ def load_data():
 
 df = load_data()
 
+# 增大 Buses (#1f77b4 深蓝) 与 Metro-North (#e6ab02 金黄) 的色彩区分度
 mode_colors = alt.Scale(
     domain=[
         'Subways', 'Buses', 'Metro-North', 'LIRR', 
         'Access-A-Ride', 'Bridges and Tunnels', 'Staten Island Railway'
     ],
     range=[
-        '#ff7f0e', '#1f77b4', '#aec7e8', '#2ca02c', 
+        '#ff7f0e', '#1f77b4', '#e6ab02', '#2ca02c', 
         '#9467bd', '#8c564b', '#e377c2'
     ]
 )
 
 time_brush = alt.selection_interval(encodings=['x'], name="brush")
-# toggle=True 允许直接点击多选/取消选中交通方式，无需按住 Shift
+# toggle=True 允许直接点击或 Shift+点击多选/取消选中交通方式
 mode_select = alt.selection_point(fields=['Transit_Mode'], name="mode_select", toggle=True)
 
 base_line = alt.Chart(df).mark_line().encode(
@@ -66,13 +67,17 @@ base_line = alt.Chart(df).mark_line().encode(
         axis=alt.Axis(format='%Y', tickCount='year', labelAngle=0)
     ),
     y=alt.Y('mean(Recovery_Rate):Q', title='Weekly Avg Recovery Rate (%)'),
-    color=alt.Color('Transit_Mode:N', scale=mode_colors, legend=alt.Legend(title="Transit Mode", orient="bottom", columns=4)),
+    color=alt.Color(
+        'Transit_Mode:N',
+        scale=mode_colors,
+        legend=alt.Legend(title="Transit Mode", orient="bottom", columns=4, labelLimit=200)
+    ),
     opacity=alt.condition(mode_select, alt.value(0.9), alt.value(0.12)),
     strokeWidth=alt.condition(mode_select, alt.value(2.2), alt.value(1.0)),
     tooltip=[
         alt.Tooltip('yearweek(Date):T', title='Week of', format='%Y-%m-%d'), 
-        'Transit_Mode:N', 
-        alt.Tooltip('mean(Recovery_Rate):Q', title='Weekly Avg Recovery (%)', format='.1f')
+        alt.Tooltip('Transit_Mode:N', title='Transit Mode'), 
+        alt.Tooltip('mean(Recovery_Rate):Q', title='Avg Recovery (%)', format='.1f')
     ]
 )
 
@@ -82,15 +87,21 @@ view1 = (base_line + baseline_100).add_params(
     time_brush
 ).properties(
     width=650, height=330,
-    title="VIEW 1: Master Longitudinal Trajectory (Weekly Avg, Drag to select time period)"
+    title=alt.TitleParams(
+        text="VIEW 1: Master Longitudinal Trajectory (Weekly Avg)",
+        subtitle="Drag to brush dates"
+    )
 )
 
 base_bar = alt.Chart(df).mark_bar().encode(
     x=alt.X('mean(Recovery_Rate):Q', title='Mean Recovery (%)'),
-    y=alt.Y('Transit_Mode:N', sort='-x', title=None),
+    y=alt.Y('Transit_Mode:N', sort='-x', title=None, axis=alt.Axis(labelLimit=200)),
     color=alt.Color('Transit_Mode:N', scale=mode_colors, legend=None),
     opacity=alt.condition(mode_select, alt.value(1.0), alt.value(0.25)),
-    tooltip=['Transit_Mode:N', alt.Tooltip('mean(Recovery_Rate):Q', format='.1f')]
+    tooltip=[
+        alt.Tooltip('Transit_Mode:N', title='Transit Mode'),
+        alt.Tooltip('mean(Recovery_Rate):Q', title='Avg Recovery (%)', format='.1f')
+    ]
 ).transform_filter(
     time_brush
 ).add_params(
@@ -101,7 +112,10 @@ baseline_bar = alt.Chart(pd.DataFrame({'x': [100]})).mark_rule(color='red', stro
 
 view2 = (base_bar + baseline_bar).properties(
     width=350, height=330,
-    title="VIEW 2: Avg Recovery in Selected Period (Click bars to multi-select)"
+    title=alt.TitleParams(
+        text="VIEW 2: Avg Recovery in Selected Period",
+        subtitle="Click bar to focus mode; Shift+click for multi-select"
+    )
 )
 
 # 与 View 2 的 sort='-x' 保持完全一致的纵轴排序规则（按平均恢复率降序）
@@ -109,13 +123,17 @@ y_mode_sort = alt.EncodingSortField(field='Recovery_Rate', op='mean', order='des
 
 heat_rect = alt.Chart(df).mark_rect(stroke='white', strokeWidth=1).encode(
     x=alt.X('Day_of_Week:O', title='Day of Week', sort=dow_order),
-    y=alt.Y('Transit_Mode:N', sort=y_mode_sort, title=None),
+    y=alt.Y('Transit_Mode:N', sort=y_mode_sort, title=None, axis=alt.Axis(labelLimit=200)),
     color=alt.Color(
         'mean(Recovery_Rate):Q', 
         scale=alt.Scale(scheme='redblue', domainMid=100, reverse=True), 
         title='Recovery (%)'
     ),
-    tooltip=['Transit_Mode:N', 'Day_of_Week:O', alt.Tooltip('mean(Recovery_Rate):Q', format='.1f')]
+    tooltip=[
+        alt.Tooltip('Transit_Mode:N', title='Transit Mode'),
+        alt.Tooltip('Day_of_Week:O', title='Day of Week'),
+        alt.Tooltip('mean(Recovery_Rate):Q', title='Avg Recovery (%)', format='.1f')
+    ]
 ).transform_filter(
     time_brush
 ).transform_filter(
@@ -124,13 +142,18 @@ heat_rect = alt.Chart(df).mark_rect(stroke='white', strokeWidth=1).encode(
 
 heat_text = alt.Chart(df).mark_text(baseline='middle', fontSize=11, fontWeight='bold').encode(
     x=alt.X('Day_of_Week:O', sort=dow_order),
-    y=alt.Y('Transit_Mode:N', sort=y_mode_sort),
+    y=alt.Y('Transit_Mode:N', sort=y_mode_sort, axis=alt.Axis(labelLimit=200)),
     text=alt.Text('mean(Recovery_Rate):Q', format='.1f'),
     color=alt.condition(
         'datum.mean_Recovery_Rate < 45 || datum.mean_Recovery_Rate > 125',
         alt.value('white'),
         alt.value('black')
-    )
+    ),
+    tooltip=[
+        alt.Tooltip('Transit_Mode:N', title='Transit Mode'),
+        alt.Tooltip('Day_of_Week:O', title='Day of Week'),
+        alt.Tooltip('mean(Recovery_Rate):Q', title='Avg Recovery (%)', format='.1f')
+    ]
 ).transform_filter(
     time_brush
 ).transform_filter(
@@ -139,7 +162,10 @@ heat_text = alt.Chart(df).mark_text(baseline='middle', fontSize=11, fontWeight='
 
 view3 = (heat_rect + heat_text).properties(
     width=1050, height=220,
-    title="VIEW 3: Day-of-Week Recovery Matrix (Red: >100%, White: ~100%, Blue: <100%)"
+    title=alt.TitleParams(
+        text="VIEW 3: Day-of-Week Recovery Matrix (TWaT Patterns)",
+        subtitle="Red: >100%, White: ~100%, Blue: <100%"
+    )
 )
 
 dashboard = alt.vconcat(
@@ -169,11 +195,15 @@ responsive_html = f"""
       margin: 0;
       padding: 0;
       width: 100%;
-      overflow-x: hidden;
+      overflow: hidden;
       background: transparent;
     }}
-    #vis-container {{
+    #vis-container, #vis-container canvas {{
       width: 100%;
+      overflow: hidden;
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
     }}
   </style>
 </head>
@@ -184,6 +214,7 @@ responsive_html = f"""
     const container = document.getElementById('vis-container');
     let resizeTimer = null;
     let lastIsDark = null;
+    let lastWidth = 0;
 
     function detectDarkMode() {{
       try {{
@@ -209,17 +240,18 @@ responsive_html = f"""
     function renderResponsive() {{
       const availW = container.clientWidth || window.innerWidth;
       const isDark = detectDarkMode();
+      lastWidth = availW;
       lastIsDark = isDark;
 
       const fgColor = isDark ? '#fafafa' : '#31333f';
       const gridColor = isDark ? 'rgba(250, 250, 250, 0.15)' : 'rgba(49, 51, 63, 0.15)';
       const domainColor = isDark ? 'rgba(250, 250, 250, 0.4)' : 'rgba(49, 51, 63, 0.4)';
 
-      // 扣除坐标轴标签、图例与间距后，按比例动态分配三视图宽度以占满 100% 横向空间
-      const topPlotW = Math.max(480, availW - 245);
+      // 扣除完整坐标轴标签(labelLimit=200)、图例与间距后，按比例动态分配三视图宽度
+      const topPlotW = Math.max(480, availW - 300);
       const v1W = Math.floor(topPlotW * 0.66);
       const v2W = Math.floor(topPlotW * 0.34);
-      const v3W = Math.max(480, availW - 235);
+      const v3W = Math.max(480, availW - 290);
 
       const spec = JSON.parse(JSON.stringify(baseSpec));
       spec.background = 'transparent';
@@ -232,7 +264,7 @@ responsive_html = f"""
         spec.vconcat[1].layer[0].mark.stroke = isDark ? '#0e1117' : '#ffffff';
       }}
 
-      // 注入适配日间/夜晚主题的坐标轴、标题与图例配色
+      // 注入适配日间/夜晚主题的坐标轴、标题与图例配色及标签宽度上限
       spec.config = {{
         ...(spec.config || {{}}),
         view: {{ ...((spec.config && spec.config.view) || {{}}), stroke: 'transparent' }},
@@ -242,11 +274,13 @@ responsive_html = f"""
           titleColor: fgColor,
           gridColor: gridColor,
           domainColor: domainColor,
-          tickColor: domainColor
+          tickColor: domainColor,
+          labelLimit: 200
         }},
         legend: {{
           labelColor: fgColor,
-          titleColor: fgColor
+          titleColor: fgColor,
+          labelLimit: 200
         }}
       }};
 
@@ -254,13 +288,25 @@ responsive_html = f"""
         actions: {{ export: true, source: false, compiled: false, editor: false }},
         renderer: 'canvas',
         theme: isDark ? 'dark' : undefined
+      }}).then(() => {{
+        // 仅用 #vis-container 自身的实际高度更新外层 iframe，避免 documentElement.scrollHeight 引发无限 resize 重绘循环
+        if (window.frameElement) {{
+          const rectH = Math.ceil(container.getBoundingClientRect().height);
+          if (rectH > 0) {{
+            window.frameElement.style.height = (rectH + 12) + 'px';
+          }}
+        }}
       }}).catch(console.error);
     }}
 
     renderResponsive();
     window.addEventListener('resize', () => {{
-      clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(renderResponsive, 150);
+      const curW = container.clientWidth || window.innerWidth;
+      // 仅当横向宽度真正变化时才重绘，避免修改 iframe 高度时触发 resize 导致刷选状态被清空
+      if (Math.abs(curW - lastWidth) > 2) {{
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(renderResponsive, 150);
+      }}
     }});
 
     // 实时监听 Streamlit 主题切换（Light / Dark）或系统主题变化
@@ -275,4 +321,4 @@ responsive_html = f"""
 </html>
 """
 
-st.iframe(responsive_html, width="stretch", height=740)
+st.iframe(responsive_html, width="stretch", height=820)
