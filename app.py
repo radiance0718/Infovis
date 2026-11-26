@@ -21,7 +21,6 @@ st.markdown(
 )
 st.title("NYC Multimodal Transit Recovery Dashboard (2020 - 2025)")
 
-# 初始化用于重置 Altair 前端选区的计数器
 if "reset_counter" not in st.session_state:
     st.session_state.reset_counter = 0
 
@@ -29,7 +28,7 @@ col_tip, col_reset = st.columns([6, 1])
 with col_tip:
     st.caption("Tip: Drag on View 1 to select a time period; click bars in View 2 to multi-select transit modes.")
 with col_reset:
-    if st.button("🔄 Reset", help="Reset all time brush and transit mode selections"):
+    if st.button("Reset", help="Reset all time brush and transit mode selections"):
         st.session_state.reset_counter += 1
 
 dow_order = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -44,7 +43,6 @@ def load_data():
 
 df = load_data()
 
-# 增大 Buses (#1f77b4 深蓝) 与 Metro-North (#e6ab02 金黄) 的色彩区分度
 mode_colors = alt.Scale(
     domain=[
         'Subways', 'Buses', 'Metro-North', 'LIRR', 
@@ -57,7 +55,6 @@ mode_colors = alt.Scale(
 )
 
 time_brush = alt.selection_interval(encodings=['x'], name="brush")
-# toggle=True 允许直接点击或 Shift+点击多选/取消选中交通方式
 mode_select = alt.selection_point(fields=['Transit_Mode'], name="mode_select", toggle=True)
 
 base_line = alt.Chart(df).mark_line().encode(
@@ -118,7 +115,6 @@ view2 = (base_bar + baseline_bar).properties(
     )
 )
 
-# 与 View 2 的 sort='-x' 保持完全一致的纵轴排序规则（按平均恢复率降序）
 y_mode_sort = alt.EncodingSortField(field='Recovery_Rate', op='mean', order='descending')
 
 heat_rect = alt.Chart(df).mark_rect(stroke='white', strokeWidth=1).encode(
@@ -175,9 +171,6 @@ dashboard = alt.vconcat(
     color='independent'
 )
 
-# ------------------------------------------------------------------
-# 响应式 100% 宽度渲染 (解决 Vega-Lite 复合图表不支持 width='container' 的限制)
-# ------------------------------------------------------------------
 spec_dict = dashboard.to_dict()
 spec_json = json.dumps(spec_dict)
 
@@ -232,7 +225,7 @@ responsive_html = f"""
           }}
         }}
       }} catch (e) {{
-        // 跨域或沙箱受限时回退到系统主题
+        //
       }}
       return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     }}
@@ -247,7 +240,6 @@ responsive_html = f"""
       const gridColor = isDark ? 'rgba(250, 250, 250, 0.15)' : 'rgba(49, 51, 63, 0.15)';
       const domainColor = isDark ? 'rgba(250, 250, 250, 0.4)' : 'rgba(49, 51, 63, 0.4)';
 
-      // 扣除完整坐标轴标签(labelLimit=200)、图例与间距后，按比例动态分配三视图宽度
       const topPlotW = Math.max(480, availW - 300);
       const v1W = Math.floor(topPlotW * 0.66);
       const v2W = Math.floor(topPlotW * 0.34);
@@ -259,12 +251,10 @@ responsive_html = f"""
       spec.vconcat[0].hconcat[1].width = v2W;
       spec.vconcat[1].width = v3W;
 
-      // 根据日间/夜间主题调整热力图单元格分隔线颜色
       if (spec.vconcat[1].layer && spec.vconcat[1].layer[0] && spec.vconcat[1].layer[0].mark) {{
         spec.vconcat[1].layer[0].mark.stroke = isDark ? '#0e1117' : '#ffffff';
       }}
 
-      // 注入适配日间/夜晚主题的坐标轴、标题与图例配色及标签宽度上限
       spec.config = {{
         ...(spec.config || {{}}),
         view: {{ ...((spec.config && spec.config.view) || {{}}), stroke: 'transparent' }},
@@ -289,7 +279,7 @@ responsive_html = f"""
         renderer: 'canvas',
         theme: isDark ? 'dark' : undefined
       }}).then(() => {{
-        // 仅用 #vis-container 自身的实际高度更新外层 iframe，避免 documentElement.scrollHeight 引发无限 resize 重绘循环
+  
         if (window.frameElement) {{
           const rectH = Math.ceil(container.getBoundingClientRect().height);
           if (rectH > 0) {{
@@ -302,14 +292,12 @@ responsive_html = f"""
     renderResponsive();
     window.addEventListener('resize', () => {{
       const curW = container.clientWidth || window.innerWidth;
-      // 仅当横向宽度真正变化时才重绘，避免修改 iframe 高度时触发 resize 导致刷选状态被清空
       if (Math.abs(curW - lastWidth) > 2) {{
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(renderResponsive, 150);
       }}
     }});
 
-    // 实时监听 Streamlit 主题切换（Light / Dark）或系统主题变化
     setInterval(() => {{
       const currentDark = detectDarkMode();
       if (currentDark !== lastIsDark) {{
